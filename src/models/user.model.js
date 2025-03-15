@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    firstName: {  // ✅ Ensure this field exists
+    firstName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -31,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     role: {
       type: DataTypes.ENUM("admin", "trainer", "member"),
-      defaultValue: "member",
+      defaultValue: "member", // Default role is "member"
+      allowNull: false,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -39,11 +40,16 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  // ✅ Define the association properly
+  // Define associations
   User.associate = (models) => {
     User.hasOne(models.Membership, {
       foreignKey: "userId",
       onDelete: "CASCADE",
+    });
+    
+    User.hasMany(models.booking, {
+      foreignKey: "memberId",
+      as: "bookings", // Alias for the association
     });
   };
 

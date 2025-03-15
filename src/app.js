@@ -59,7 +59,9 @@ const userRoutes = require("./routes/user.routes");
 const membershipRoutes = require("./routes/membership.routes");
 const bodyMeasurementRoutes = require("./routes/bodyMeasurement.routes");
 const classRoutes = require("./routes/class.routes");
-const workoutRoutes = require("./routes/workouts.routes"); // Import workout routes
+const workoutRoutes = require("./routes/workouts.routes");
+const trainerClassRoutes = require("./routes/trainerClass.routes");
+
 
 // Use routes
 app.use("/api/auth", authRoutes);
@@ -67,7 +69,9 @@ app.use("/api", userRoutes);
 app.use("/api/membership", membershipRoutes);
 app.use("/api/measurements", bodyMeasurementRoutes);
 app.use("/api/v1/classes", classRoutes);
-app.use("/api/workouts", workoutRoutes); // Mount workout routes
+app.use("/api/workouts", workoutRoutes);  
+app.use("/api/v1/trainer", trainerClassRoutes);
+
 
 // Handle 404 errors
 app.use((req, res, next) => {
