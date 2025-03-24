@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Membership = sequelize.define("Membership", {
+  const Membership = sequelize.define("membership", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,

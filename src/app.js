@@ -8,93 +8,43 @@ const errorMiddleware = require("./middleware/error.middleware");
 
 const app = express();
 
-// Enable CORS for all routes
+// ✅ CORS Configuration (Allow External Requests via Ngrok)
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS || "*", // Allow all origins if no specific origin is provided
+  origin: "*",  // ⚠️ TEMPORARY: Use specific origins in production
+  credentials: true,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Authorization"],
 };
 app.use(cors(corsOptions));
 
-// Security middleware
-app.use(helmet());
-
-// Use compression
+// ✅ Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: false,  // ⚠️ Disabled for API requests (React Native)
+}));
 app.use(compression());
-
-// Parse JSON requests
 app.use(express.json());
-
-// Parse URL-encoded requests
 app.use(express.urlencoded({ extended: true }));
 
-// HTTP request logger
-app.use(morgan("combined", { stream: logger.stream }));
+// ✅ Logging (Debugging)
+app.use(morgan("dev", { stream: logger.stream }));
 
-// Database connection and sync
-const db = require("./models");
-const Role = db.role;
-
-// In development, sync and reset database (consider using migrations in production)
-if (process.env.NODE_ENV === "development") {
-  db.sequelize
-    .sync({ force: true }) // Drop and re-sync the database
-    .then(() => {
-      console.log("Drop and re-sync db.");
-      initial(); // Initialize roles
-    })
-    .catch((err) => {
-      console.error("Error syncing database:", err);
-    });
-} else {
-  db.sequelize.sync(); // Sync without dropping tables in production
-}
-
-// Simple route for testing
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the Gym Management API" });
-});
-
-// Import routes
+// ✅ Import Routes
 const authRoutes = require("./routes/auth.routes");
-const userRoutes = require("./routes/user.routes");
-const membershipRoutes = require("./routes/membership.routes");
-const bodyMeasurementRoutes = require("./routes/bodyMeasurement.routes");
-const classRoutes = require("./routes/class.routes");
-const workoutRoutes = require("./routes/workouts.routes");
-const trainerClassRoutes = require("./routes/trainerClass.routes");
-
-
-// Use routes
 app.use("/api/auth", authRoutes);
-app.use("/api", userRoutes);
-app.use("/api/membership", membershipRoutes);
-app.use("/api/measurements", bodyMeasurementRoutes);
-app.use("/api/v1/classes", classRoutes);
-app.use("/api/workouts", workoutRoutes);  
-app.use("/api/v1/trainer", trainerClassRoutes);
 
-
-// Handle 404 errors
-app.use((req, res, next) => {
-  res.status(404).json({
-    message: "Not Found - The requested resource does not exist.",
-  });
+// ✅ Root Route
+app.get("/", (req, res) => {
+  res.json({ message: "Gym Management API is Running 🚀" });
 });
 
-// Global error handler
+// ✅ Error Handling Middleware
 app.use(errorMiddleware);
 
-// Initialize roles function
-async function initial() {
-  try {
-    // Create default roles if they don't exist
-    await Role.findOrCreate({ where: { id: 1, name: "member" } });
-    await Role.findOrCreate({ where: { id: 2, name: "trainer" } });
-    await Role.findOrCreate({ where: { id: 3, name: "admin" } });
-    console.log("Roles created or verified successfully!");
-  } catch (err) {
-    console.error("Error creating roles:", err);
-  }
-}
+// ✅ Handle 404 Errors
+app.use((req, res, next) => {
+  res.status(404).json({ message: "❌ Route Not Found" });
+});
 
-// Export the app
+// ✅ Export the App
 module.exports = app;
